@@ -9,15 +9,23 @@ containerEl.appendChild(leftImgEl);
 containerEl.appendChild(centerImgEl);
 containerEl.appendChild(rightImgEl);
 
-let attempts = 1;
-let maxAttempts=25;
 
+
+
+let attempts = 1;
+let maxAttempts = 25;
+let checkImages = [];
 let products = [];
+let productsNames = [];
+let votes = [];
+let views = [];
 function Product(productName) {
   this.productName = productName.split('.')[0];
   this.img = 'images/' + productName;
   this.votes = 0;
+  this.views = 0;
 
+  productsNames.push(this.productName);
   products.push(this);
 }
 
@@ -32,6 +40,7 @@ for (let i = 0; i < productImages.length; i++) {
 function randomIndex() {
 
   return Math.floor(Math.random() * products.length);
+
 }
 
 
@@ -45,47 +54,116 @@ function renderRandomImg() {
   leftIndex = randomIndex();
   centerIndex = randomIndex();
   rightIndex = randomIndex();
-  while(leftIndex===rightIndex || leftIndex===centerIndex){
+
+
+
+  while ((leftIndex === centerIndex) || (leftIndex === rightIndex) || (centerIndex === rightIndex) || checkImages.includes(leftIndex) || checkImages.includes(centerIndex) || checkImages.includes(rightIndex)) {
     leftIndex = randomIndex();
+    centerIndex = randomIndex();
+    rightIndex = randomIndex();
+
   }
-  leftImgEl.setAttribute('src',products[leftIndex].img);
-  centerImgEl.setAttribute('src',products[centerIndex].img);
-  rightImgEl.setAttribute('src',products[rightIndex].img);
-  leftImgEl.setAttribute('alt',products[leftIndex].productName);
-  centerImgEl.setAttribute('alt',products[centerIndex].productName);
-  rightImgEl.setAttribute('alt',products[rightIndex].productName);
-  leftImgEl.setAttribute('title',products[leftIndex].productName);
-  centerImgEl.setAttribute('title',products[centerIndex].productName);
-  rightImgEl.setAttribute('title',products[rightIndex].productName);
+
+  leftImgEl.setAttribute('src', products[leftIndex].img);
+  centerImgEl.setAttribute('src', products[centerIndex].img);
+  rightImgEl.setAttribute('src', products[rightIndex].img);
+  leftImgEl.setAttribute('alt', products[leftIndex].productName);
+  centerImgEl.setAttribute('alt', products[centerIndex].productName);
+  rightImgEl.setAttribute('title', products[rightIndex].productName);
+  rightImgEl.setAttribute('alt', products[rightIndex].productName);
+  leftImgEl.setAttribute('title', products[leftIndex].productName);
+  centerImgEl.setAttribute('title', products[centerIndex].productName);
+
+
+
+  products[leftIndex].views++;
+  products[centerIndex].views++;
+  products[rightIndex].views++;
 
 
 }
 renderRandomImg();
-leftImgEl.addEventListener('click',handleClicks);
-centerImgEl.addEventListener('click',handleClicks);
-rightImgEl.addEventListener('click',handleClicks);
 
-function handleClicks(event){
-  if(attempts<=maxAttempts){
-    let clickedImg= event.target.id;
-    if(clickedImg==='leftImg'){
+
+
+
+
+
+
+
+
+leftImgEl.addEventListener('click', handleClicks);
+centerImgEl.addEventListener('click', handleClicks);
+rightImgEl.addEventListener('click', handleClicks);
+
+
+function handleClicks(event) {
+  if (attempts <= maxAttempts) {
+    let clickedImg = event.target.id;
+    if (clickedImg === 'leftImg') {
       products[leftIndex].votes++;
-    }else if(clickedImg==='centerImg'){
+    } else if (clickedImg === 'centerImg') {
       products[centerIndex].votes++;
-    }else if(clickedImg==='rightImg'){
+    } else if (clickedImg === 'rightImg') {
       products[rightIndex].votes++;
     }
     renderRandomImg();
-  }else{
+  } else {
     let ulEl = document.getElementById('results');
     for (let i = 0; i < products.length; i++) {
       let liEl = document.createElement('li');
       liEl.textContent = `${products[i].productName} has ${products[i].votes} votes and ${products[i].views} views .`;
       ulEl.appendChild(liEl);
+      votes.push(products[i].votes);
+      views.push(products[i].views);
     }
     leftImgEl.removeEventListener('click', handleClicks);
     centerImgEl.removeEventListener('click', handleClicks);
     rightImgEl.removeEventListener('click', handleClicks);
+    chartRender();
   }
   attempts++;
+}
+
+
+
+
+
+function chartRender() {
+  let ctx = document.getElementById('myChart').getContext('2d');
+  let myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: productsNames,
+      datasets: [{
+        label: '# of Votes',
+        data: votes,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+        ],
+        borderWidth: 2
+      },
+      {
+        label: '# of views',
+        data: views,
+        backgroundColor: [
+          'rgba(155, 199, 132, 0.2)',
+        ],
+        borderColor: [
+          'rgba(155, 199, 120, 0.2)',
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
 }
