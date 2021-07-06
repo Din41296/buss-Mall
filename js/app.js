@@ -19,6 +19,12 @@ let products = [];
 let productsNames = [];
 let votes = [];
 let views = [];
+
+
+
+
+
+
 function Product(productName) {
   this.productName = productName.split('.')[0];
   this.img = 'images/' + productName;
@@ -27,6 +33,7 @@ function Product(productName) {
 
   productsNames.push(this.productName);
   products.push(this);
+  saveToLocalStorage();
 }
 
 
@@ -65,8 +72,14 @@ function renderRandomImg() {
   }
 
   leftImgEl.setAttribute('src', products[leftIndex].img);
+  products[leftIndex].views++;
+  saveToLocalStorage();
   centerImgEl.setAttribute('src', products[centerIndex].img);
+  products[centerIndex].views++;
+  saveToLocalStorage();
   rightImgEl.setAttribute('src', products[rightIndex].img);
+  products[rightIndex].views++;
+  saveToLocalStorage();
   leftImgEl.setAttribute('alt', products[leftIndex].productName);
   centerImgEl.setAttribute('alt', products[centerIndex].productName);
   rightImgEl.setAttribute('title', products[rightIndex].productName);
@@ -76,9 +89,7 @@ function renderRandomImg() {
 
 
 
-  products[leftIndex].views++;
-  products[centerIndex].views++;
-  products[rightIndex].views++;
+
 
 
 }
@@ -102,10 +113,13 @@ function handleClicks(event) {
     let clickedImg = event.target.id;
     if (clickedImg === 'leftImg') {
       products[leftIndex].votes++;
+      saveToLocalStorage();
     } else if (clickedImg === 'centerImg') {
       products[centerIndex].votes++;
+      saveToLocalStorage();
     } else if (clickedImg === 'rightImg') {
       products[rightIndex].votes++;
+      saveToLocalStorage();
     }
     renderRandomImg();
   } else {
@@ -167,3 +181,21 @@ function chartRender() {
     }
   });
 }
+
+
+// adding local storage
+function saveToLocalStorage() {
+  let dataStored = JSON.stringify(products);
+  localStorage.setItem('products', dataStored);
+
+}
+
+function readFromLocalStorage(){
+  let stringObject=localStorage.getItem('products');
+  let normalObject=JSON.parse(stringObject);
+  if(normalObject !== null){
+    products=normalObject;
+  }
+}
+
+readFromLocalStorage();
